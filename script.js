@@ -49,4 +49,4 @@ numberButtons.forEach(button => {
         calculator.appendNumber(button.innerHTML)
         calculator.updateDisplay()
     })
-})
+});
