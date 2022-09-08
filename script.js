@@ -13,7 +13,8 @@ class Calculator {
     }
 
     delete() {
-
+        this.currentOperand = this.currentOperand.toString().slice(0, -1);
+        this.updateDisplay();
     }
 
     appendNumber(number) {
@@ -25,18 +26,71 @@ class Calculator {
     }
 
     chooseOperation(operation) {
-        this.previousOperand = this.currentOperand + " " + operation.toString();
+        if (this.currentOperand === "") return;
+        if (this.previousOperand !== "") this.compute();
+        this.operation = operation;
+        this.previousOperand = this.currentOperand;
         this.currentOperand = "";
         this.updateDisplay();
     }
 
     compute() {
+        let result;
+        const prev = parseFloat(this.previousOperand);
+        const current = parseFloat(this.currentOperand);
 
+        if (isNaN(prev) || isNaN(current)) return;
+
+        switch (this.operation) {
+            case "+":
+                result = prev + current;
+                break;
+                case "-":
+                result = prev - current;
+                break;
+                case "*":
+                result = prev * current;
+                break;
+                case "÷":
+                result = prev / current;
+                break;
+                default:
+                    return;
+        }
+        this.currentOperand = result;
+        this.operation = undefined;
+        this.previousOperand = "";
+
+        this.previousOperandTextElement.innerHTML = "";
+        this.updateDisplay();
+    }
+
+    getDisplayNumber(number){
+        const stringNumber = number.toString();
+        const integerDigits = parseFloat(stringNumber.split(".")[0]);
+        const decimalDigits = stringNumber.split(".")[1];
+        let integerDisplay;
+
+        if (isNaN(integerDigits)){
+            integerDisplay = "";
+        } else {
+            integerDisplay = integerDigits.toLocaleString("en", {maximumFractionDigits: 0});
+        }
+
+        if (decimalDigits != null){
+            return `${integerDisplay}.${decimalDigits}`
+        } else {
+            return integerDisplay;
+        }
+ 
     }
 
     updateDisplay() {
-        this.currentOperandTextElement.innerHTML = this.currentOperand;
-        this.previousOperandTextElement.innerHTML = this.previousOperand;
+        this.currentOperandTextElement.innerHTML = this.getDisplayNumber(this.currentOperand);
+        if (this.operation != null) {
+            this.previousOperandTextElement.innerHTML = this.getDisplayNumber(this.previousOperand) + " " + this.operation;
+        }
+
     }
 }
 
@@ -44,6 +98,7 @@ const numberButtons = document.querySelectorAll("[data-number]");
 const operationButtons = document.querySelectorAll("[data-operation]");
 const equalsButton = document.querySelector("[data-equals]");
 const allClearButton = document.querySelector("[data-all-clear]");
+const delButton = document.querySelector("[data-delete]");
 const previousOperandTextElement = document.querySelector("[data-previous-operand]");
 const currentOperandTextElement = document.querySelector("[data-current-operand]");
 
@@ -62,3 +117,5 @@ operationButtons.forEach(button => {
     });
 });
 allClearButton.addEventListener("click", () => calculator.clear());
+equalsButton.addEventListener("click", () => calculator.compute());
+delButton.addEventListener("click", () => calculator.delete());
